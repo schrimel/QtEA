@@ -6,11 +6,12 @@
 #include "ui_qtea.h"
 #include "webview.h"
 
-QtEA::QtEA(QWidget *parent)
+QtEA::QtEA(QWidget *parent, const std::string &iBaseUrl)
     : QMainWindow(parent)
     , ui(new Ui::QtEA)
 {
     m_webview = new WebView(this);
+    m_webview->setBaseUrl(new QUrl(QString::fromStdString(iBaseUrl)));
     _dbg_close = false;
     ui->setupUi(this);
     setCentralWidget(m_webview);
@@ -46,6 +47,7 @@ void QtEA::closeEvent(QCloseEvent *event)
     }
     else
     {
+        emit closeRequest();
         event->accept();
     }
 }

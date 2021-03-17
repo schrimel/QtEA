@@ -30,6 +30,11 @@ QT += webenginewidgets core
 
 COPIES += install_it
 
+LIBS += "C:/lib/opencv/build/x64/vc15/lib/opencv_world451.lib"
+
+INCLUDEPATH += "C:/lib/opencv/build/include"
+DEPENDPATH += "C:/lib/opencv/build/include"
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
@@ -37,8 +42,3 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 install_it.path = $$OUT_PWD/res
 install_it.files += $$files(res/*.conf)
-
-LIBS += "Z:/Libs/opencv/build/x64/vc15/lib/opencv_world451d.lib" #$$(FLEX_OPENCV_WORLD_LIB)
-
-INCLUDEPATH += "Z:/Libs/opencv/build/include" #$$(FLEX_OPENCV_INCLUDE_PATH) #e.g. "C:/lib/opencv/build/include"
-DEPENDPATH += "Z:/Libs/opencv/build/include"#$$(FLEX_OPENCV_INCLUDE_PATH)

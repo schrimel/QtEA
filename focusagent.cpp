@@ -25,8 +25,8 @@ void FocusAgent::setFocusInformation(bool iFocusInformation)
 
 void FocusAgent::workerFunc()
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     mIsRunning = true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     while(true)
     {
        std::cout << "Has focus: " << mFocusInformation << std::endl;
@@ -43,6 +43,7 @@ void FocusAgent::workerFunc()
        }
        std::this_thread::sleep_for(std::chrono::milliseconds(30000)); //wait half a minute before checking again
        emit requestFocusInformation();
+       QMutexLocker lock(mutex);
        if(!mIsRunning)
        {
            break;

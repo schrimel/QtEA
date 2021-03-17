@@ -14,7 +14,7 @@ class QtEA : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit QtEA(QWidget *parent = nullptr);
+    explicit QtEA(QWidget *parent = nullptr, const std::string & iBaseUrl="https://qt.io");
     void closeEvent(QCloseEvent *event);
     ~QtEA();
 
@@ -28,6 +28,7 @@ public slots:
     void onFocusInformationRequested();
 signals:
     void sendFocusInformation(bool);
+    void closeRequest();
 
 };
 #endif // QTEA_H
