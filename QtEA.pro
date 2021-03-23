@@ -10,6 +10,7 @@ CONFIG += c++11 file_copies
 
 SOURCES += \
     focusagent.cpp \
+    keyboardagent.cpp \
     main.cpp \
     qtea.cpp \
     screencapture.cpp \
@@ -17,6 +18,7 @@ SOURCES += \
 
 HEADERS += \
     focusagent.h \
+    keyboardagent.h \
     misc_functions.hpp \
     platform.hpp \
     qtea.h \

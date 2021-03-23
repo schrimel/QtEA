@@ -14,6 +14,7 @@
 #include "focusagent.h"
 #include "platform.hpp"
 #include "misc_functions.hpp"
+#include "keyboardagent.h"
 
 
 #if defined(WINDOWS)
@@ -101,7 +102,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("QtEA");
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication a(argc, argv);
-
     QtEA w(nullptr, wBaseUrl);;
     w.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint );
 
@@ -110,17 +110,23 @@ int main(int argc, char *argv[])
     QObject::connect(&w, &QtEA::sendFocusInformation, &fa, &FocusAgent::setFocusInformation);
     QObject::connect(&w, &QtEA::closeRequest, &fa, &FocusAgent::terminate);
 
+    KeyboardAgent ka;
+    QObject::connect(&w, &QtEA::closeRequest, &ka, &KeyboardAgent::terminate);
+    ka.start();
 
     w.show();
     wait(500);
-    w.showFullScreen();
+    //w.showFullScreen();
 
     fa.start(); //TODO implement a starting condition
 
     int ret = a.exec();
     fa.terminate();
     fa.quit();
-    fa.wait();
+    fa.wait(5000);
+    ka.terminate();
+//    ka.quit();
+//    ka.wait();
 
     //platform-specific! --> WIN BEGIN
     //SwitchDesktop(hOld);

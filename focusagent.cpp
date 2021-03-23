@@ -41,13 +41,13 @@ void FocusAgent::workerFunc()
            mScreenshotCounter++;
 
        }
-       std::this_thread::sleep_for(std::chrono::milliseconds(30000)); //wait half a minute before checking again
-       emit requestFocusInformation();
        QMutexLocker lock(mutex);
        if(!mIsRunning)
        {
            break;
        }
+       std::this_thread::sleep_for(std::chrono::milliseconds(2000)); //wait half a minute before checking again
+       emit requestFocusInformation();
     }
 }
 
