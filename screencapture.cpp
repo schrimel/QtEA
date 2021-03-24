@@ -24,8 +24,8 @@ QPixmap Screencapture::grabScreens()
 
       foreach (auto scr, screens)
         {
-          QRect g = scr->geometry();
-          QPixmap pix = scr->grabWindow(0, g.x(), g.y(), g.width(), g.height());
+          //QRect g = scr->geometry();
+          QPixmap pix = scr->grabWindow(0);
           w += pix.width();
           h = std::max(h, pix.height());
           scrs.append(pix);
