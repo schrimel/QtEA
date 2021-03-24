@@ -30,12 +30,27 @@ FORMS += \
 
 QT += webenginewidgets core
 
+unix:!android: QT += x11extras
+
 COPIES += install_it
 
-LIBS += "C:/lib/opencv/build/x64/vc15/lib/opencv_world451.lib"
+win32: INCLUDEPATH += "C:/lib/opencv/build/include"
+else: unix:!android: INCLUDEPATH += /usr/include/opencv4
+win32: DEPENDPATH += "C:/lib/opencv/build/include"
+else: unix:!android: DEPENDPATH += /usr/include/opencv4
 
-INCLUDEPATH += "C:/lib/opencv/build/include"
-DEPENDPATH += "C:/lib/opencv/build/include"
+release{
+
+win32: LIBS += "C:/lib/opencv/build/x64/vc15/lib/opencv_world451.lib"
+else: unix:!android: LIBS += -L/usr/lib/x86_64-linux-gnu -lopencv_core -lopencv_calib3d -lopencv_features2d -lopencv_imgproc -lopencv_imgcodecs -lX11
+
+}
+#debug{
+#    win32: LIBS += "C:/lib/opencv/build/x64/vc15/lib/opencv_world451d.lib"
+#    else: unix:!android: LIBS += -L/usr/lib/x86_64-linux-gnu -lopencv_cored -lopencv_calib3dd -lopencv_features2dd -lopencv_imgprocd -lX11
+#
+#}
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -5,6 +5,7 @@
 #include <string>
 
 //qt includes
+#include <QtGlobal>
 #include <QApplication>
 #include <QtWebEngineWidgets>
 
@@ -12,12 +13,11 @@
 #include "qtea.h"
 #include "webview.h"
 #include "focusagent.h"
-#include "platform.hpp"
 #include "misc_functions.hpp"
 #include "keyboardagent.h"
 
 
-#if defined(WINDOWS)
+#if defined(Q_OS_WIN32)
 #include <windows.h>
 #pragma comment(lib, "kernel32.lib")
 #pragma comment(lib, "user32.lib")
@@ -74,6 +74,12 @@ std::string getUrlFromConfig(const std::string & iFilename)
     return rUrl;
 }
 
+#if defined(Q_OS_LINUX)
+void signalHandler(int signum)
+{
+
+}
+#endif
 void wait(int ms)
 {
     QTime dieTime = QTime::currentTime().addMSecs(ms);
@@ -89,6 +95,7 @@ int main(int argc, char *argv[])
 
     //TODO calculate checksum
 
+#if defined(Q_OS_WIN32)
     //platform-specific! --> WIN BEGIN
     HDESK hOld = GetThreadDesktop(GetCurrentThreadId());
 
@@ -97,13 +104,17 @@ int main(int argc, char *argv[])
     //SetThreadDesktop(desk);
 
     //platform-specific! --> WIN END
-
+#endif
 
     QCoreApplication::setOrganizationName("QtEA");
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication a(argc, argv);
     QtEA w(nullptr, wBaseUrl);;
-    w.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint );
+#if defined(Q_OS_LINUX)
+    w.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+#elif defined(Q_OS_WIN32)
+    w.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
+#endif
 
     FocusAgent fa;
     QObject::connect(&fa, &FocusAgent::requestFocusInformation, &w, &QtEA::onFocusInformationRequested);
@@ -122,7 +133,6 @@ int main(int argc, char *argv[])
 
     int ret = a.exec();
     fa.terminate();
-    fa.quit();
     fa.wait(5000);
     ka.terminate();
 //    ka.quit();

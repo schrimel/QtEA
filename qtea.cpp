@@ -6,7 +6,7 @@
 #include "ui_qtea.h"
 #include "webview.h"
 
-#if defined(POSIX)
+#if defined(Q_OS_LINUX)
 #include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -21,16 +21,17 @@ QtEA::QtEA(QWidget *parent, const std::string &iBaseUrl)
     _dbg_close = false;
     ui->setupUi(this);
     setCentralWidget(m_webview);
-#if defined(POSIX)
+#if defined(Q_OS_LINUX)
     unsigned long data = 0xFFFFFFFF;
     XChangeProperty(QX11Info::display(),
                     winId(),
-                    XInternAtom(QX11Info::display(), "_NET_WM_DESKTOP", false),
+                    XInternAtom(QX11Info::display(), "_NET_WM_DESKTOP", 1),
                     XA_CARDINAL,
                     32,
                     PropModeReplace,
                     reinterpret_cast<unsigned char*>(&data),
                     1);
+    XMapWindow(QX11Info::display(), winId());
 #endif
 }
 
