@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
     QObject::connect(&w, &QtEA::sendFocusInformation, &fa, &FocusAgent::setFocusInformation);
     QObject::connect(&w, &QtEA::closeRequest, &fa, &FocusAgent::terminate);
 
+
     KeyboardAgent ka;
     QObject::connect(&w, &QtEA::closeRequest, &ka, &KeyboardAgent::terminate);
     ka.start();
@@ -135,6 +136,7 @@ int main(int argc, char *argv[])
     fa.terminate();
     fa.wait(5000);
     ka.terminate();
+    //ka.terminate();
 //    ka.quit();
 //    ka.wait();
 
