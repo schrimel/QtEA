@@ -52,6 +52,5 @@ void FocusAgent::workerFunc()
 
 void FocusAgent::terminate()
 {
-    QMutexLocker lock(mutex);
     mIsRunning = false;
 }

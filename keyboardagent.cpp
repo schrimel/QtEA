@@ -1,10 +1,14 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+
 #include <QMutex>
-#include <Windows.h>
 
 #include "keyboardagent.h"
+
+#if defined(Q_OS_WIN32)
+
+#include <Windows.h>
 
 HHOOK hHook = {NULL};
 bool isCtrlDown = false;
@@ -147,3 +151,85 @@ void KeyboardAgent::unsetHook(HHOOK hOld)
 {
     UnhookWindowsHookEx(hOld);
 }
+
+#elif defined(Q_OS_LINUX)
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <atomic>
+
+std::atomic_bool wIsRunning(false);
+
+void KeyboardAgent::start()
+{
+    mIsRunning = true;
+    wIsRunning = true;
+    setHook();
+}
+
+void workerFunc()
+{
+    Display* display = XOpenDisplay(0);
+    Window root = DefaultRootWindow(display);
+    XEvent evt;
+
+    unsigned int modifiers = AnyModifier;
+    int keycode = XKeysymToKeycode(display, XK_Tab);
+    Window grab_window = root;
+    Bool owner_events = False;
+    int pointer_mode = GrabModeAsync;
+    int keyboard_mode = GrabModeAsync;
+
+    XGrabKey(display, keycode, modifiers, grab_window, owner_events, pointer_mode, keyboard_mode);
+
+    XSelectInput(display, root, KeyPressMask);
+    while(true)
+    {
+        std::cout << "hello i am alive" << std::endl;
+        std::cout << wIsRunning << std::endl;
+        if(!wIsRunning.load())
+        {
+            break;
+        }
+        XNextEvent(display, &evt);
+        switch(evt.type)
+        {
+        case KeyPress:
+            std::cout << evt.xkey.keycode << std::endl;
+            if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (ShiftMask | ControlMask))
+            {
+                std::cout << "hot key pressed" << std::endl;
+                XUngrabKey(display, keycode, modifiers, grab_window);
+            }
+            break;
+        default:
+            break;
+        }
+        //xcxcstd::this_thread::sleep_for(std::chrono::seconds(5));
+    }
+    std::cout << "end keyboard listening" << std::endl;
+    XCloseDisplay(0);
+}
+
+void KeyboardAgent::setHook()
+{
+    std::cout << "thread started wuhu" << std::endl;
+    std::thread t{workerFunc};
+    t.detach();
+}
+
+void KeyboardAgent::unsetHook()
+{
+    wIsRunning = false;
+    mIsRunning = false;
+}
+
+void KeyboardAgent::terminate()
+{
+    unsetHook();
+}
+
+KeyboardAgent::KeyboardAgent() : mIsRunning(false)
+{
+}
+#endif
