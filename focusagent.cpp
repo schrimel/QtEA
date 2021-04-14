@@ -37,7 +37,6 @@ void FocusAgent::workerFunc()
            //TODO send Screenshot to Server --> Javascript injection?
            //TODO create Log-entry
 
-
            mScreenshotCounter++;
 
        }

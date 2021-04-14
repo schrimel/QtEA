@@ -1,5 +1,9 @@
+//std-c++ includes
+#include <iostream>
+
 //qt includes
 #include <QtWebEngineWidgets>
+#include <QKeyEvent>
 
 //user includes
 #include "qtea.h"
@@ -11,6 +15,12 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #endif
+
+void QtEA::onNetworkInterfacesChanged()
+{
+   std::cout << "network interface changed" << std::endl;
+}
+
 
 QtEA::QtEA(QWidget *parent, const std::string &iBaseUrl)
     : QMainWindow(parent)
@@ -68,4 +78,21 @@ void QtEA::closeEvent(QCloseEvent *event)
         emit closeRequest();
         event->accept();
     }
+}
+
+bool QtEA::eventFilter(QObject* obj, QEvent* event)
+{
+    if(event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent* key = static_cast<QKeyEvent*>(event);
+        if(key->modifiers() & Qt::ShiftModifier)
+        {
+            if(key->key() == Qt::Key_A)
+            {
+                std::cout << "nice" << std::endl;
+                return true;
+            }
+        }
+    }
+    return false;
 }

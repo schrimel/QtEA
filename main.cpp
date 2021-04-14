@@ -8,6 +8,7 @@
 #include <QtGlobal>
 #include <QApplication>
 #include <QtWebEngineWidgets>
+#include <QNetworkInterface>
 
 //user includes
 #include "qtea.h"
@@ -15,6 +16,9 @@
 #include "focusagent.h"
 #include "misc_functions.hpp"
 #include "keyboardagent.h"
+#include "clipboardagent.h"
+#include "keyboardfilter.h"
+#include "networkagent.h"
 
 
 #if defined(Q_OS_WIN32)
@@ -25,7 +29,7 @@
 #pragma comment(lib, "comdlg32.lib")
 #endif
 
-const std::string STD_CONFIG_FILE = "res/example-url.conf";
+const std::string STD_CONFIG_FILE = "res/example-url-ssl.conf";
 
 std::string getUrlFromConfig(const std::string & iFilename)
 {
@@ -100,8 +104,8 @@ int main(int argc, char *argv[])
     HDESK hOld = GetThreadDesktop(GetCurrentThreadId());
 
     HDESK desk = CreateDesktop((LPCWSTR)"QtEA", NULL, NULL, 0, GENERIC_ALL, NULL);
-    //SwitchDesktop(desk);
-    //SetThreadDesktop(desk);
+//    SwitchDesktop(desk);
+//    SetThreadDesktop(desk);
 
     //platform-specific! --> WIN END
 #endif
@@ -109,7 +113,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("QtEA");
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication a(argc, argv);
+    QWebEngineProfile::defaultProfile()->setUseForGlobalCertificateVerification();
     QtEA w(nullptr, wBaseUrl);;
+
 #if defined(Q_OS_LINUX)
     w.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
 #elif defined(Q_OS_WIN32)
@@ -125,6 +131,22 @@ int main(int argc, char *argv[])
     QObject::connect(&w, &QtEA::closeRequest, &ka, &KeyboardAgent::terminate);
     ka.start();
 
+    ClipboardAgent ca;
+    QClipboard *qc = QApplication::clipboard();
+    QObject::connect(qc, &QClipboard::dataChanged, &ca, &ClipboardAgent::processClipboardChange);
+
+    NetworkAgent na;
+    QObject::connect(&na, &NetworkAgent::networkInterfacesChanged, &w, &QtEA::onNetworkInterfacesChanged);
+    na.start();
+
+
+    //new class eventfilter:
+    a.installEventFilter(new KeyboardFilter());
+
+    QList<QHostAddress> li = QNetworkInterface::allAddresses();
+//    for(int i = 0; i < li.size(); ++i)
+//        std::cout << li.at(i).toString().toStdString() << std::endl;
+
     w.show();
     wait(500);
     //w.showFullScreen();
@@ -135,12 +157,14 @@ int main(int argc, char *argv[])
     fa.terminate();
     fa.wait(5000);
     ka.terminate();
+    na.terminate();
+    na.wait(5000);
 //    ka.quit();
 //    ka.wait();
 
     //platform-specific! --> WIN BEGIN
-    //SwitchDesktop(hOld);
-    //CloseDesktop(desk);
+//    SwitchDesktop(hOld);
+//    CloseDesktop(desk);
     //platform-specific! --> WIN END
 
     return ret;

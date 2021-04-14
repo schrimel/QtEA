@@ -23,9 +23,13 @@ private:
     WebView *m_webview;
     bool _dbg_close;
 
+protected:
+    bool eventFilter(QObject* obj, QEvent* event);
+
 public slots:
     void changeUrl();
     void onFocusInformationRequested();
+    void onNetworkInterfacesChanged();
 signals:
     void sendFocusInformation(bool);
     void closeRequest();

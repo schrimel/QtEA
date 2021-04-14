@@ -39,7 +39,6 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
         {
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
-            std::cout << wVirtKey << std::endl;
             if(GetAsyncKeyState(VK_CONTROL) & 0x8000 || GetAsyncKeyState(VK_LCONTROL) & 0x8000 || GetAsyncKeyState(VK_RCONTROL) & 0x8000)
             {
                 isCtrlDown = true;
@@ -57,7 +56,6 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
             case VK_CONTROL:
             case VK_LCONTROL:
             case VK_RCONTROL:
-                std::cout << "here" << std::endl;
                 isCtrlDown = true;
                 break;
             case VK_MENU:
