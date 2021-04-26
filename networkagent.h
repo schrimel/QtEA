@@ -18,6 +18,7 @@ private:
 
 public slots:
     bool startMonitoring();
+    void terminate();
 signals:
     void networkInterfacesChanged();
     void serverNotReachable();

@@ -57,8 +57,6 @@ void NetworkAgent::monitorNetworkInterfaces()
             //analyze ip: check if p2p ip is in the exam network
             if(isP2P)
                 continue;
-
-
         }
     }
 }
@@ -67,5 +65,11 @@ bool NetworkAgent::isExamNetworkInList()
 {
     return true;
 }
+
+void NetworkAgent::terminate()
+{
+    mIsRunning = false;
+}
+
 
 //bool isExamNetworkInList(); //imagine having a student that has not connected to the network KEKW

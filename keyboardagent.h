@@ -31,6 +31,8 @@ private:
 #endif
 public slots:
     void terminate();
+signals:
+    void suspiciousKeyCombinationPressed(const QString &report);
 };
 
 

@@ -12,6 +12,7 @@ public:
 public slots:
     void processClipboardChange();
 signals:
+    void externalClipboardContentDetected();
 
 };
 

@@ -2,6 +2,7 @@
 #define WEBPAGE_H
 
 #include <QWebEnginePage>
+#include <QSslCertificate>
 
 class WebPage : public QWebEnginePage
 {
@@ -11,12 +12,15 @@ public:
 protected:
     virtual bool certificateError(const QWebEngineCertificateError &error);
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString &message, int i, const QString &sourceId);
+private:
+    QSslCertificate * mSslCert;
 
 private slots:
     void setRandomCert(QWebEngineClientCertificateSelection selection);
     void onCloseRequestedDummy();
 signals:
     void closeOnConsoleMessage();
+    void receivedLockFromServer();
 
 };
 

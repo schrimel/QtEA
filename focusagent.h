@@ -26,6 +26,7 @@ private:
 
 signals:
     void requestFocusInformation();
+    void focusLost(const QString &info);
 
 public slots:
     void setFocusInformation(bool);

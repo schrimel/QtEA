@@ -185,8 +185,10 @@ void workerFunc()
     XSelectInput(display, root, KeyPressMask);
     while(true)
     {
-        std::cout << "hello i am alive" << std::endl;
-        std::cout << wIsRunning << std::endl;
+#ifdef QT_DEBUG
+        qDebug() << "hello i am alive";
+        qDebug() << wIsRunning;
+#endif
         if(!wIsRunning.load())
         {
             break;
@@ -195,10 +197,10 @@ void workerFunc()
         switch(evt.type)
         {
         case KeyPress:
-            std::cout << evt.xkey.keycode << std::endl;
+            qDebug() << evt.xkey.keycode;
             if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (ShiftMask | ControlMask))
             {
-                std::cout << "hot key pressed" << std::endl;
+                qDebug() << "hot key pressed";
                 XUngrabKey(display, keycode, modifiers, grab_window);
             }
             break;
@@ -207,13 +209,17 @@ void workerFunc()
         }
         //xcxcstd::this_thread::sleep_for(std::chrono::seconds(5));
     }
-    std::cout << "end keyboard listening" << std::endl;
+#ifdef QT_DEBUG
+    qDebug() << "end keyboard listening";
+#endif
     XCloseDisplay(0);
 }
 
 void KeyboardAgent::setHook()
 {
-    std::cout << "thread started wuhu" << std::endl;
+#ifdef QT_DEBUG
+    qDebug() << "thread started";
+#endif
     std::thread t{workerFunc};
     t.detach();
 }

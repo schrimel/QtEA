@@ -11,40 +11,70 @@
 #include <QWebEngineScript>
 #include <QString>
 #include <QWebEngineScriptCollection>
+#include <QWebEngineProfile>
+#include <QWebEngineClientCertificateStore>
+#include <QFile>
 
 WebPage::WebPage(QWebEngineProfile *profile, QObject *parent) : QWebEnginePage(profile, parent)
 {
     connect(this, &QWebEnginePage::selectClientCertificate, this, &WebPage::setRandomCert);
+#ifdef QT_DEBUG
     qDebug()<<"connected";
-    QWebEngineScript script;
-    QString code = QString::fromStdString("console.log('hello, world')");
-    script.setSourceCode(code);
-    script.setWorldId(QWebEngineScript::MainWorld);
-    script.setInjectionPoint(QWebEngineScript::Deferred);
-    this->scripts().insert(script);
-    runJavaScript(code, QWebEngineScript::ApplicationWorld);
+    qDebug() << this->profile()->clientCertificateStore()->certificates();
+#endif
+    QFile pKeyFile("C:\\Users\\CSchi\\cert\\client-key1.pem");
+
+    pKeyFile.open(QIODevice::ReadOnly);
+
+    //QFile certFile("C:\\Users\\CSchi\\client.crt");
+    QFile certFile("C:\\Users\\CSchi\\cert\\cs-cert.pem");
+    certFile.open(QIODevice::ReadOnly);
+
+    QSslKey pKey(&pKeyFile, QSsl::Rsa);
+    QSslCertificate cert(&certFile);
+    mSslCert = new QSslCertificate(&pKeyFile);
+
+#ifdef QT_DEBUG
+    //this->profile()->clientCertificateStore()->add(cert, pKey);
+    qDebug() << this->profile()->clientCertificateStore()->certificates();
+#endif
+//    QWebEngineScript script;
+//    QString code = QString::fromStdString("console.log('hello, world')");
+//    script.setSourceCode(code);
+//    script.setWorldId(QWebEngineScript::MainWorld);
+//    script.setInjectionPoint(QWebEngineScript::Deferred);
+//    this->scripts().insert(script);
+//    runJavaScript(code, QWebEngineScript::ApplicationWorld);
     connect(this, &WebPage::closeOnConsoleMessage, this, &WebPage::onCloseRequestedDummy);
 }
 
 void WebPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString &message, int i, const QString &sourceId)
 {
-    qDebug() << message;
-    qDebug() << message.compare("close");
+    //qDebug() << message;
+    //qDebug() << message.compare("close");
     if(message == "close")
     {
-        qDebug() << "close requested";
+        //qDebug() << "close requested";
         emit closeOnConsoleMessage();
+    }
+
+    if(message == "LOCK")
+    {
+        emit receivedLockFromServer();
     }
 }
 
 void WebPage::onCloseRequestedDummy()
 {
-    qDebug() << "app closed";
+    //qDebug() << "app closed";
 }
 
 bool WebPage::certificateError(const QWebEngineCertificateError &error)
 {
     QWidget *mainWindow = view()->window();
+#ifdef QT_DEBUG
+    qDebug() << error.errorDescription();
+#endif
 
     #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QWebEngineCertificateError deferredError = error;
@@ -90,6 +120,16 @@ bool WebPage::certificateError(const QWebEngineCertificateError &error)
 
 void WebPage::setRandomCert(QWebEngineClientCertificateSelection selection)
 {
+#ifdef QT_DEBUG
+    qDebug() << this->profile()->clientCertificateStore()->certificates();
     qDebug() << "called";
+#endif
+    //selection.select(*mSslCert);
     selection.select(selection.certificates().at(0));
+
+    //TODO
+    /* First of all: Select the correct certificate
+     * then: emit a signal to verify binaries (if this is part of the thesis...)
+     * or else --> display error
+    */
 }

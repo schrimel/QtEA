@@ -13,6 +13,11 @@
 #include "focusagent.h"
 
 
+/**REWORK NEEDED :    QObject::connect(qApp, &QGuiApplication::applicationStateChanged, this, [=](Qt::ApplicationState state){
+        qDebug() << state;
+    });
+*/
+
 FocusAgent::FocusAgent() : mFocusInformation(false), mIsRunning(false), mScreenshotCounter(0)
 {
     mutex = new QMutex();
@@ -29,14 +34,13 @@ void FocusAgent::workerFunc()
     std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     while(true)
     {
-       std::cout << "Has focus: " << mFocusInformation << std::endl;
        if(!mFocusInformation)
        {
            Screencapture sc;
            sc.saveScreenshotToFile("tmp" + std::to_string(mScreenshotCounter) + ".png"); //TODO blur screenshot
            //TODO send Screenshot to Server --> Javascript injection?
            //TODO create Log-entry
-
+           emit focusLost("Application lost focus."); //TODO: add a timestamp - either here or in agentcontroller.h
            mScreenshotCounter++;
 
        }
@@ -45,7 +49,7 @@ void FocusAgent::workerFunc()
        {
            break;
        }
-       std::this_thread::sleep_for(std::chrono::milliseconds(2000)); //wait half a minute before checking again
+       std::this_thread::sleep_for(std::chrono::milliseconds(20000)); //wait half a minute before checking again
        emit requestFocusInformation();
     }
 }

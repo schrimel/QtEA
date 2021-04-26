@@ -4,9 +4,6 @@
 //std-c++ includes
 #include <string>
 
-//user includes
-#include "platform.hpp"
-
 class QPixmap;
 
 #pragma once
