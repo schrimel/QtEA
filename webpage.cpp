@@ -18,47 +18,46 @@
 WebPage::WebPage(QWebEngineProfile *profile, QObject *parent) : QWebEnginePage(profile, parent)
 {
     connect(this, &QWebEnginePage::selectClientCertificate, this, &WebPage::setRandomCert);
-#ifdef QT_DEBUG
-    qDebug()<<"connected";
-    qDebug() << this->profile()->clientCertificateStore()->certificates();
-#endif
-    QFile pKeyFile("C:\\Users\\CSchi\\cert\\client-key1.pem");
-
-    pKeyFile.open(QIODevice::ReadOnly);
-
-    //QFile certFile("C:\\Users\\CSchi\\client.crt");
-    QFile certFile("C:\\Users\\CSchi\\cert\\cs-cert.pem");
-    certFile.open(QIODevice::ReadOnly);
-
-    QSslKey pKey(&pKeyFile, QSsl::Rsa);
-    QSslCertificate cert(&certFile);
-    mSslCert = new QSslCertificate(&pKeyFile);
-
-#ifdef QT_DEBUG
-    //this->profile()->clientCertificateStore()->add(cert, pKey);
-    qDebug() << this->profile()->clientCertificateStore()->certificates();
-#endif
-//    QWebEngineScript script;
-//    QString code = QString::fromStdString("console.log('hello, world')");
-//    script.setSourceCode(code);
-//    script.setWorldId(QWebEngineScript::MainWorld);
-//    script.setInjectionPoint(QWebEngineScript::Deferred);
-//    this->scripts().insert(script);
-//    runJavaScript(code, QWebEngineScript::ApplicationWorld);
     connect(this, &WebPage::closeOnConsoleMessage, this, &WebPage::onCloseRequestedDummy);
 }
 
-void WebPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString &message, int i, const QString &sourceId)
+void WebPage::executeJavaScript(const QString & iScript)
+{
+    if(iScript.isNull() || iScript.isEmpty())
+        return;
+
+    runJavaScript(iScript, [](const QVariant &v){
+        //Callback function is called with the result of the last executed statement
+        //develop JS-scripts so that last statement returns 'true' if execution was successful
+        //return false if execution failed somehow
+        qDebug() << v.toString();
+    });
+}
+
+void WebPage::executeJavaScriptFromFile(const QString & iFilename)
+{
+    QFile wJS(iFilename);
+    if(!wJS.exists())
+    {
+        qDebug() << "JavaScript file does not exist.";
+        return;
+    }
+    QTextStream wTStream(&wJS);
+    QString code = wTStream.readAll();
+    executeJavaScript(code);
+}
+
+void WebPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel iLevel, const QString &iMessage, int iLineNumber, const QString &iSourceId)
 {
     //qDebug() << message;
     //qDebug() << message.compare("close");
-    if(message == "close")
+    if(iMessage == "close")
     {
         //qDebug() << "close requested";
         emit closeOnConsoleMessage();
     }
 
-    if(message == "LOCK")
+    if(iMessage == "LOCK")
     {
         emit receivedLockFromServer();
     }

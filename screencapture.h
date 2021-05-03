@@ -6,6 +6,10 @@
 
 class QPixmap;
 
+#if defined(Q_OS_WINDOWS)
+struct tagRECT;
+#endif
+
 #pragma once
 #include <opencv2/opencv.hpp>
 class Screencapture
@@ -13,6 +17,9 @@ class Screencapture
 public:
     Screencapture();
     void saveScreenshotToFile(std::string iFilename);
+#if defined(Q_OS_WINDOWS)
+    void screenshotOverlapToFile(tagRECT* tr, std::string iFilename);
+#endif
 private:
     QPixmap grabScreens();
 

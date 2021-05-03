@@ -4,6 +4,7 @@
 //qt includes
 #include <QtWebEngineWidgets>
 #include <QKeyEvent>
+#include <QStackedWidget>
 
 //user includes
 #include "qtea.h"
@@ -18,9 +19,15 @@
 
 void QtEA::onNetworkInterfacesChanged()
 {
-   std::cout << "network interface changed" << std::endl;
+#ifdef QT_DEBUG
+   qDebug() << "network interface changed";
+#endif
 }
 
+void QtEA::onLockReceived()
+{
+    //what to do?
+}
 
 QtEA::QtEA(QWidget *parent, const std::string &iBaseUrl)
     : QMainWindow(parent)
@@ -30,7 +37,17 @@ QtEA::QtEA(QWidget *parent, const std::string &iBaseUrl)
     m_webview->setBaseUrl(new QUrl(QString::fromStdString(iBaseUrl)));
     _dbg_close = false;
     ui->setupUi(this);
+//    setAcceptDrops(false);
+    centralWidget()->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
     setCentralWidget(m_webview);
+
+#ifdef QT_DEBUG
+    QObject::connect(qApp, &QGuiApplication::applicationStateChanged, this, [=](Qt::ApplicationState state){
+        qDebug() << state;
+    });
+#endif
+
+
 #if defined(Q_OS_LINUX)
     unsigned long data = 0xFFFFFFFF;
     XChangeProperty(QX11Info::display(),
@@ -78,21 +95,4 @@ void QtEA::closeEvent(QCloseEvent *event)
         emit closeRequest();
         event->accept();
     }
-}
-
-bool QtEA::eventFilter(QObject* obj, QEvent* event)
-{
-    if(event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent* key = static_cast<QKeyEvent*>(event);
-        if(key->modifiers() & Qt::ShiftModifier)
-        {
-            if(key->key() == Qt::Key_A)
-            {
-                std::cout << "nice" << std::endl;
-                return true;
-            }
-        }
-    }
-    return false;
 }

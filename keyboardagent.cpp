@@ -197,10 +197,14 @@ void workerFunc()
         switch(evt.type)
         {
         case KeyPress:
+#ifdef QT_DEBUG
             qDebug() << evt.xkey.keycode;
+#endif
             if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (ShiftMask | ControlMask))
             {
+#ifdef QT_DEBUG
                 qDebug() << "hot key pressed";
+#endif
                 XUngrabKey(display, keycode, modifiers, grab_window);
             }
             break;

@@ -30,6 +30,7 @@ public slots:
     void changeUrl();
     void onFocusInformationRequested();
     void onNetworkInterfacesChanged();
+    void onLockReceived();
 signals:
     void sendFocusInformation(bool);
     void closeRequest();

@@ -19,8 +19,9 @@
 #include "misc_functions.hpp"
 #include "keyboardagent.h"
 #include "clipboardagent.h"
-#include "keyboardfilter.h"
+//#include "keyboardfilter.h"
 #include "networkagent.h"
+#include "focusagentii.h"
 
 
 #if defined(Q_OS_WIN32)
@@ -48,6 +49,7 @@ std::string getUrlFromConfig(const std::string & iFilename)
             {
                 if(std::getline(wBuffer, value)){
                     rUrl = value;
+                    break;
                 }
                 else
                 {
@@ -120,6 +122,7 @@ int main(int argc, char *argv[])
 
 #ifdef QT_DEBUG
     qDebug() << QString::fromStdString(wBaseUrl);
+    qDebug() << a.screens().size();
 #endif
 
 #if defined(Q_OS_LINUX)
@@ -130,10 +133,14 @@ int main(int argc, char *argv[])
 
     //Initialize Qt-EApp Security Components
 
+    /*
     FocusAgent fa;
     QObject::connect(&fa, &FocusAgent::requestFocusInformation, &w, &QtEA::onFocusInformationRequested);
     QObject::connect(&w, &QtEA::sendFocusInformation, &fa, &FocusAgent::setFocusInformation);
-    QObject::connect(&w, &QtEA::closeRequest, &fa, &FocusAgent::terminate);
+    QObject::connect(&w, &QtEA::closeRequest, &fa, &FocusAgent::terminate);*/
+
+    FocusAgentII faii;
+    QObject::connect(&a, &QApplication::applicationStateChanged, &faii, &FocusAgentII::onFocusLost);
 
     KeyboardAgent ka;
     QObject::connect(&w, &QtEA::closeRequest, &ka, &KeyboardAgent::terminate);
@@ -142,34 +149,56 @@ int main(int argc, char *argv[])
     ClipboardAgent ca;
     QClipboard *qc = QApplication::clipboard();
     QObject::connect(qc, &QClipboard::dataChanged, &ca, &ClipboardAgent::processClipboardChange);
-    QObject::connect(&ca, &ClipboardAgent::externalClipboardContentDetected, &w, &QtEA::onNetworkInterfacesChanged);
+    //DBG: QObject::connect(&ca, &ClipboardAgent::externalClipboardContentDetected, &w, &QtEA::onNetworkInterfacesChanged);
 
     NetworkAgent na;
     QObject::connect(&na, &NetworkAgent::networkInterfacesChanged, &w, &QtEA::onNetworkInterfacesChanged);
     QObject::connect(&w, &QtEA::closeRequest, &na, &NetworkAgent::terminate);
     na.start();
 
-
     //new class eventfilter:
-    a.installEventFilter(new KeyboardFilter());
+    //a.installEventFilter(new KeyboardFilter());
 
-    //QList<QHostAddress> li = QNetworkInterface::allAddresses();
-//    for(int i = 0; i < li.size(); ++i)
-//        std::cout << li.at(i).toString().toStdString() << std::endl;
     w.show();
     //wait(500);
     //w.showFullScreen();
 
-    fa.start(); //TODO implement a starting condition
+    QWidget * widget = new QWidget();
+    if(a.screens().size() > 1)
+    {
+#if defined(Q_OS_LINUX)
+        widget->setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+#elif defined(Q_OS_WIN32)
+        widget->setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
+#endif
+        widget->show();
+        widget->setAttribute(Qt::WA_QuitOnClose, false);
+
+        QScreen* secondScreen;
+        QList<QScreen*> screens = a.screens();
+        for(QScreen* screen : screens)
+        {
+            if(screen != a.primaryScreen())
+            {
+                secondScreen = screen;
+            }
+        }
+
+        widget->windowHandle()->setScreen(secondScreen);
+        widget->showFullScreen();
+    }
+
+    //fa.start(); //TODO implement a starting condition
     //std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     //std::cout << "Time difference" << std::chrono::duration_cast<std::chrono::milliseconds> (end-begin).count() << "[ns]" << std::endl;
 
     int ret = a.exec();
-    fa.terminate();
-    fa.wait(5000);
+    /*fa.terminate();
+    fa.wait(5000);*/
     ka.terminate();
     na.terminate();
     na.wait(5000);
+    delete widget;
 
     //platform-specific! --> WIN BEGIN
 //    SwitchDesktop(hOld);

@@ -1,4 +1,4 @@
-QT       += core gui testlib
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -9,10 +9,12 @@ CONFIG += c++11 file_copies openssl openssl-linked
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    agentcontroller.cpp \
     clipboardagent.cpp \
     focusagent.cpp \
+    focusagentii.cpp \
     keyboardagent.cpp \
-    keyboardfilter.cpp \
+#    keyboardfilter.cpp \
     main.cpp \
     networkagent.cpp \
     qtea.cpp \
@@ -21,13 +23,14 @@ SOURCES += \
     webview.cpp
 
 HEADERS += \
+    agentcontroller.h \
     clipboardagent.h \
     focusagent.h \
+    focusagentii.h \
     keyboardagent.h \
-    keyboardfilter.h \
+#    keyboardfilter.h \
     misc_functions.hpp \
     networkagent.h \
-    platform.hpp \
     qtea.h \
     screencapture.h \
     webpage.h \

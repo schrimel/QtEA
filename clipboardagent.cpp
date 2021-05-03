@@ -18,8 +18,10 @@ void ClipboardAgent::processClipboardChange()
     QClipboard * qClipboard = QApplication::clipboard();
     if(qClipboard->ownsClipboard())
     {
+#ifdef QT_DEBUG
         if(!qClipboard->text().isNull() && !qClipboard->text().isEmpty())
             qDebug() << qClipboard->text();
+#endif
         return;
     }
     else

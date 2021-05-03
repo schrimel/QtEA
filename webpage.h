@@ -9,9 +9,11 @@ class WebPage : public QWebEnginePage
     Q_OBJECT
 public:
     WebPage(QWebEngineProfile *profile, QObject *parent = nullptr);
+    void executeJavaScript(const QString & iScript);
+    void executeJavaScriptFromFile(const QString & iFilename);
 protected:
-    virtual bool certificateError(const QWebEngineCertificateError &error);
-    virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString &message, int i, const QString &sourceId);
+    virtual bool certificateError(const QWebEngineCertificateError &iError);
+    virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel iLevel, const QString &iMessage, int iLineNumber, const QString &iSourceId);
 private:
     QSslCertificate * mSslCert;
 
