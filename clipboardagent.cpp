@@ -33,3 +33,23 @@ void ClipboardAgent::processClipboardChange()
         }
     }
 }
+
+#if defined(QT_OS_LINUX)
+
+void ClipboardAgent::processSelectionChange()
+{
+    QClipboard * qClipboard = QApplication::clipboard();
+    if(qClipboard->ownsSelection())
+    {
+        return;
+    }
+    else
+    {
+        if(!qClipboard->text(QClipboard::Mode::Selection).isNull() && !qClipboard->text(QClipboard::Mode::Selection).isEmpty())
+        {
+            emit externalClipboardContentDetected();
+            qClipboard->clear(QClipboard::Mode::Selection);
+        }
+    }
+}
+#endif

@@ -19,6 +19,7 @@ public:
     void saveScreenshotToFile(std::string iFilename);
 #if defined(Q_OS_WINDOWS)
     void screenshotOverlapToFile(tagRECT* tr, std::string iFilename);
+    void screenshotOverlappingBlurred(std::vector<tagRECT*> liTr);
 #endif
 private:
     QPixmap grabScreens();

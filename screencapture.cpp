@@ -30,6 +30,7 @@ QPixmap Screencapture::grabScreens()
         {
           //QRect g = scr->geometry();
           QPixmap pix = scr->grabWindow(0);
+
           w += pix.width();
           h = std::max(h, pix.height());
           scrs.append(pix);
@@ -174,8 +175,6 @@ void Screencapture::screenshotOverlapToFile(tagRECT* tr, std::string iFilename)
     const int x = tr->left;
     const int y = tr->top;
 
-    qDebug() << " i am here";
-
     cv::Mat wPrintimg = QImageToCvMat(img);
     cv::Rect region(x, y, width, height);
 
@@ -186,6 +185,31 @@ void Screencapture::screenshotOverlapToFile(tagRECT* tr, std::string iFilename)
 
     wBlurredRegion.copyTo(wPrintimg(region));
     cv::imwrite(iFilename, wPrintimg);
+}
+
+void Screencapture::screenshotOverlappingBlurred(std::vector<tagRECT *> liTr)
+{
+    QPixmap pm = grabScreens();
+    QImage img = pm.toImage();
+    cv::Mat wPrintimg = QImageToCvMat(img);
+
+    for(tagRECT* tr : liTr)
+    {
+        const int bsize = 10;
+        const int width = tr->right - tr->left;
+        const int height = tr->bottom - tr->top;
+        const int x = tr->left;
+        const int y = tr->top;
+
+        cv::Rect region(x, y, width, height);
+
+        cv::Rect wPaddedRegion(x-bsize, y-bsize, width+2*bsize, height + 2*bsize);
+        cv::Mat wBlurredPaddedRegion;
+        cv::GaussianBlur(wPrintimg(wPaddedRegion), wBlurredPaddedRegion, cv::Size(0,0), 4);
+        cv::Mat wBlurredRegion = wBlurredPaddedRegion(cv::Rect(bsize, bsize, width, height));
+
+        wBlurredRegion.copyTo(wPrintimg(region));
+    }
 }
 
 #endif

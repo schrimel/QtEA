@@ -40,6 +40,7 @@ void NetworkAgent::monitorNetworkInterfaces()
             if(!mInitialNetworks.contains(a)){
                 qDebug() << "new network detected";
                 emit networkInterfacesChanged();
+                mInitialNetworks.append(a);
             }
         }
         QList<QNetworkInterface> nwis = QNetworkInterface::allInterfaces();

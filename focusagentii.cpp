@@ -13,6 +13,7 @@
 #include <chrono>
 
 bool isOverlapped(HWND hwnd);
+void screenshotOverlappingWindows(HWND);
 
 FocusAgentII::FocusAgentII(QObject *parent) : QObject(parent), mScreenshotCounter(0)
 {
@@ -30,7 +31,8 @@ void FocusAgentII::onFocusLost(Qt::ApplicationState state)
     //Screencapture sc;
     //sc.saveScreenshotToFile("tmp" + std::to_string(mScreenshotCounter) + ".png"); //TODO blur screenshot
     HWND hwnd = (HWND)QApplication::activeWindow()->winId();
-    qDebug() << isOverlapped(hwnd);
+    //qDebug() << isOverlapped(hwnd);
+    screenshotOverlappingWindows(hwnd);
     //TODO send Screenshot to Server --> Javascript injection?
     //TODO create Log-entry
     emit focusLost("Application lost focus."); //TODO: add a timestamp - either here or in agentcontroller.h
@@ -67,7 +69,7 @@ bool isOverlapped(HWND hwnd)
     return false;
 }
 
-/* UNDER CONSTRUCTION
+/* UNDER CONSTRUCTION*/
 void screenshotOverlappingWindows(HWND hwnd)
 {
     std::set<HWND> visited = {hwnd};
@@ -93,7 +95,82 @@ void screenshotOverlappingWindows(HWND hwnd)
         delete intersection;
     }
 }
-*/
+/*
 #if defined(Q_OS_LINUX)
-#endif
+bool isOverlapped(const void* hWnd, _XDisplay* pd)
+{
+    Display* pDisplay = pd == nullptr ? XOpenDisplay(nullptr) : pd;
+    if(pDisplay == nullptr)
+    {
+        return true;
+    }
+    auto root = XDefaultRootWindow(pDisplay);
+    Window parent;
+    /*Window* windowList;
+    unsigned nchildren;
+    if (!XQueryTree(pDisplay, root, &root, &parent, &windowList, &nchildren))
+    {
+        if(pd == nullptr)
+        {
+            XCloseDisplay(pDisplay);
+        }
+        return true;
+    }*7/
 
+    Atom propCleints = XInternAtom(pDisplay, "_NET_CLIENT_LIST_STACKING", True);
+    unsigned long ulBytesReturned = 0;
+    Window *windowList = (Window *)GetWindowProperty(pDisplay, root, propCleints, &ulBytesReturned);
+    unsigned long nchildren = ulBytesReturned / sizeof(Window);
+    int32_t actualDesktop = GetWindowDesktop(pDisplay, (TWindow) hWnd);
+
+    WindowRect targetWindowRect;
+    GetWindowRect(hWnd, targetWindowRect, pDisplay);
+    GdkRectangle targetGdkRect;
+    targetGdkRect.x = targetWindowRect.x;
+    targetGdkRect.y = targetWindowRect.y;
+    targetGdkRect.width = targetWindowRect.width;
+    targetGdkRect.height = targetWindowRect.height;
+    bool handleWindow = false;
+    bool res = false;
+    for (unsigned long i = 0; i < nchildren; ++i)
+    {
+        auto window = windowList[i];
+        if((Window)hWnd == window)
+        {
+            handleWindow = true;
+            continue;
+        }
+        if(handleWindow)
+        {
+            if((GetWindowDesktop(pDisplay, window) != actualDesktop) || IsWindowHidden((void*)window, pDisplay))
+            {
+                continue;
+            }
+            else
+            {
+                WindowRect rc;
+                GetWindowRect((void*)window, rc, pDisplay);
+                GdkRectangle gdkRect;
+                gdkRect.x = rc.x;
+                gdkRect.y = rc.y;
+                gdkRect.width = rc.width;
+                gdkRect.height = rc.height;
+                if(gdk_rectangle_intersect(&targetGdkRect, &gdkRect, nullptr))
+                {
+                    res = true;
+                    break;
+                }
+            }
+        }
+    }
+    XFree(windowList);
+    if(pd == nullptr)
+    {
+        XCloseDisplay(pDisplay);
+    }
+
+    return res;
+}
+
+#endif
+*/

@@ -61,6 +61,10 @@ void WebPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel iLevel, con
     {
         emit receivedLockFromServer();
     }
+    if(iMessage == "UNLOCK")
+    {
+        emit receivedUnlockFromServer();
+    }
 }
 
 void WebPage::onCloseRequestedDummy()

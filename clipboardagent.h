@@ -11,8 +11,12 @@ public:
 
 public slots:
     void processClipboardChange();
+#if defined(QT_OS_LINUX)
+    void processSelectionChange();
+#endif
 signals:
     void externalClipboardContentDetected();
+
 
 };
 

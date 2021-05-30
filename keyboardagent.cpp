@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <QMutex>
+#include <QDebug>
 
 #include "keyboardagent.h"
 
@@ -16,8 +17,9 @@ bool isAltDown = false;
 bool isWinDown = false;
 bool isEscDown = false;
 bool isAltGrDown = false;
-bool isAllowedCtrlCommand = false;
-bool isAllowedAltCommand = false;
+bool isAllowedCtrlCommand = true;
+bool isAllowedAltCommand = true;
+bool isAllowedAltGrCommand = true;
 //evtl function keys...
 
 KeyboardAgent::KeyboardAgent() : mIsRunning(false)
@@ -38,23 +40,11 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
         DWORD wVirtKey = kbdStruct->vkCode;
         DWORD wScanCode = kbdStruct->scanCode;
         DWORD wFlags = kbdStruct->flags;
-
+        qDebug() << wVirtKey;
         switch(wParam)
         {
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
-            if(GetAsyncKeyState(VK_CONTROL) & 0x8000 || GetAsyncKeyState(VK_LCONTROL) & 0x8000 || GetAsyncKeyState(VK_RCONTROL) & 0x8000)
-            {
-                isCtrlDown = true;
-            }
-            if(GetAsyncKeyState(VK_MENU) & 0x8000)
-            {
-                isAltDown = true;
-            }
-            if(GetAsyncKeyState(VK_ESCAPE) & 0x8000)
-            {
-                isEscDown = true;
-            }
             switch(wVirtKey)
             {
             case VK_CONTROL:
@@ -63,6 +53,7 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
                 isCtrlDown = true;
                 break;
             case VK_MENU:
+            case VK_RMENU:
                 isAltDown = true;
                 break;
             case VK_LWIN:
@@ -81,40 +72,46 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
             case VK_F4:
                 isAllowedAltCommand = true;
                 break;
+            case '	':
+                isAllowedAltCommand = false;
+                isAllowedAltGrCommand = false;
+                isAllowedCtrlCommand = false;
+                break;
+            case '7':
+            case '8':
+            case '9':
+            case '0':
+            case 'q':
+            case 'Q':
+            case '+':
+            case '?':
+                isAllowedAltGrCommand = true;
+                break;
             }
             if(isWinDown || isCtrlDown || isAltDown || isEscDown)
             {
-                bool suppressSignal = !((isCtrlDown&&isAllowedCtrlCommand) || (isAltDown && isAllowedAltCommand));
+                bool suppressSignal = !((isCtrlDown&&isAllowedCtrlCommand) || (isAltDown && isAllowedAltCommand) || (isCtrlDown&&isAltDown&&isAllowedAltGrCommand));
+                qDebug() << suppressSignal;
                 if(suppressSignal)
                 {
-                    isAllowedCtrlCommand = false;
                     return (LRESULT) 1; //return non-zero value and do not pass on to next method
                 }
             }
           break;
         case WM_KEYUP:
         case WM_SYSKEYUP:
-            if(!(GetKeyState(VK_CONTROL) & 0x8000) || !(GetKeyState(VK_LCONTROL) & 0x8000) || !(GetKeyState(VK_RCONTROL) & 0x8000))
-            {
-                isCtrlDown = false;
-            }
-            if(!(GetKeyState(VK_MENU) & 0x8000))
-            {
-                isAltDown = false;
-            }
-            if(!(GetKeyState(VK_ESCAPE) & 0x8000))
-            {
-                isEscDown = false;
-            }
             switch(wVirtKey)
             {
             case VK_CONTROL:
             case VK_LCONTROL:
             case VK_RCONTROL:
                isCtrlDown = false;
+               isAltGrDown = false;
                break;
             case VK_MENU:
+            case VK_RMENU:
                isAltDown = false;
+               isAltGrDown = false;
                break;
             case VK_LWIN:
             case VK_RWIN:
@@ -123,6 +120,11 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
             case VK_ESCAPE:
                isEscDown = false;
                break;
+            case '	':
+                isAllowedAltCommand = true;
+                isAllowedAltGrCommand = true;
+                isAllowedCtrlCommand = true;
+                break;
             }
         }
     }
@@ -136,11 +138,6 @@ HMODULE GetCurrentModule()
     return wModuleHandle;
 }
 
-void KeyboardAgent::terminate()
-{
-    mIsRunning = false;
-    unsetHook(hHook);
-}
 
 HHOOK KeyboardAgent::setHook()
 {
@@ -151,6 +148,13 @@ void KeyboardAgent::unsetHook(HHOOK hOld)
 {
     UnhookWindowsHookEx(hOld);
 }
+
+void KeyboardAgent::terminate()
+{
+    mIsRunning = false;
+    unsetHook(hHook);
+}
+
 
 #elif defined(Q_OS_LINUX)
 
@@ -185,10 +189,6 @@ void workerFunc()
     XSelectInput(display, root, KeyPressMask);
     while(true)
     {
-#ifdef QT_DEBUG
-        qDebug() << "hello i am alive";
-        qDebug() << wIsRunning;
-#endif
         if(!wIsRunning.load())
         {
             break;
@@ -197,14 +197,8 @@ void workerFunc()
         switch(evt.type)
         {
         case KeyPress:
-#ifdef QT_DEBUG
-            qDebug() << evt.xkey.keycode;
-#endif
-            if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (ShiftMask | ControlMask))
+            if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (ControlMask | Mod1Mask | Mod4Mask))
             {
-#ifdef QT_DEBUG
-                qDebug() << "hot key pressed";
-#endif
                 XUngrabKey(display, keycode, modifiers, grab_window);
             }
             break;
@@ -213,17 +207,11 @@ void workerFunc()
         }
         //xcxcstd::this_thread::sleep_for(std::chrono::seconds(5));
     }
-#ifdef QT_DEBUG
-    qDebug() << "end keyboard listening";
-#endif
     XCloseDisplay(0);
 }
 
 void KeyboardAgent::setHook()
 {
-#ifdef QT_DEBUG
-    qDebug() << "thread started";
-#endif
     std::thread t{workerFunc};
     t.detach();
 }

@@ -1,12 +1,14 @@
-QT       += core gui
+QT       += core gui testlib
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++11 file_copies openssl openssl-linked
+CONFIG += c++11 file_copies testcase
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+RC_ICONS = res/background_img.ico
 
 SOURCES += \
     agentcontroller.cpp \
@@ -15,6 +17,7 @@ SOURCES += \
     focusagentii.cpp \
     keyboardagent.cpp \
 #    keyboardfilter.cpp \
+    lockoverlay.cpp \
     main.cpp \
     networkagent.cpp \
     qtea.cpp \
@@ -29,6 +32,7 @@ HEADERS += \
     focusagentii.h \
     keyboardagent.h \
 #    keyboardfilter.h \
+    lockoverlay.h \
     misc_functions.hpp \
     networkagent.h \
     qtea.h \
@@ -38,7 +42,8 @@ HEADERS += \
 
 FORMS += \
     certificateerrordialog.ui \
-    qtea.ui
+    qtea.ui \
+    lockoverlay.ui
 
 QT += webenginewidgets core
 
@@ -71,3 +76,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 install_it.path = $$OUT_PWD/res
 install_it.files += $$files(res/*.conf)
+
+DISTFILES += \
+    diagrams/qtea.qmodel \
+    gui.qmodel \
+    keycombinations

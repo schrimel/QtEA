@@ -23,6 +23,7 @@ private slots:
 signals:
     void closeOnConsoleMessage();
     void receivedLockFromServer();
+    void receivedUnlockFromServer();
 
 };
 
