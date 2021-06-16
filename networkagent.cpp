@@ -1,5 +1,6 @@
 #include "networkagent.h"
 #include <QDebug>
+#include <QApplication>
 
 NetworkAgent::NetworkAgent()
 {
@@ -16,15 +17,18 @@ bool NetworkAgent::startMonitoring()
     }
     else
     {
-        emit serverNotReachable();
         return false;
     }
 }
 
 void NetworkAgent::run()
 {
-    startMonitoring();
-    //this results in bad/non-functional behavior if startMonitoring returns false...
+    if(!startMonitoring())
+    {
+        emit serverNotReachable();
+    }
+
+    //if it returns false --> emit signal which will cause an error message :-)
 }
 
 

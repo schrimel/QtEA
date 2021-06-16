@@ -65,6 +65,19 @@ void WebPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel iLevel, con
     {
         emit receivedUnlockFromServer();
     }
+    //Syntax: 'JSEXEC-F Filename' or 'JSEXEC-S Script'
+    if(iMessage.startsWith("JSEXEC-F"))
+    {
+        QStringList split = iMessage.split(" ");
+        if(split.size() > 1)
+            executeJavaScriptFromFile(split.at(1));
+    }
+    if(iMessage.startsWith("JSEXEC-S"))
+    {
+        QStringList split = iMessage.split(" ");
+        if(split.size() > 1)
+            executeJavaScript(split.at(1));
+    }
 }
 
 void WebPage::onCloseRequestedDummy()

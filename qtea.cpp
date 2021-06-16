@@ -8,6 +8,7 @@
 #include <QStackedWidget>
 #include <QInputDialog>
 #include <QRegExp>
+#include <QMessageBox>
 
 //user includes
 #include "qtea.h"
@@ -58,10 +59,16 @@ QtEA::QtEA(QWidget *parent, const QString &iBaseUrl)
     {
         bool ok;
         QString title("Incorrect URL!");
-        QString message("The url from the config file is not correct. Please enter the URL from the exam server. You might ask your examinator for this.");
-        QString url = QInputDialog::getText(this, title, message, QLineEdit::Normal,"",&ok);//,(Qt::WindowFlags)Qt::WA_AlwaysStackOnTop);
-        temp = url;
-        w_baseUrl = QUrl(temp);
+        QString message("The url from the config file is malformed. Please contact your examinor. The program will exit now.");
+//        QString url = QInputDialog::getText(this, title, message, QLineEdit::Normal,"",&ok);//,(Qt::WindowFlags)Qt::WA_AlwaysStackOnTop);
+//        temp = url;
+//        w_baseUrl = QUrl(temp);
+
+        QMessageBox b( QMessageBox::Icon::Critical,title, message,QMessageBox::NoButton,nullptr,Qt::Dialog);
+        b.addButton(QMessageBox::StandardButton::Ok);
+        b.show();
+        b.exec();
+        exit(0);
     }
     m_stacked = new QStackedWidget();
     m_webview = new WebView(this, w_baseUrl);
@@ -164,3 +171,10 @@ void QtEA::closeEvent(QCloseEvent *event)
         event->accept();
     }
 }
+
+void QtEA::onFocusLost(const QString &info)
+{
+    show();
+//    /*showFullScreen*/();
+}
+

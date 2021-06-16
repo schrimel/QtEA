@@ -53,6 +53,7 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
                 isCtrlDown = true;
                 break;
             case VK_MENU:
+            case VK_LMENU:
             case VK_RMENU:
                 isAltDown = true;
                 break;

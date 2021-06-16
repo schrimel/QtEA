@@ -34,6 +34,8 @@ public slots:
     void onNetworkInterfacesChanged();
     void onLockReceived();
     void onUnlockReceived();
+    void onFocusLost(const QString &info);
+
 signals:
     void sendFocusInformation(bool);
     void closeRequest();

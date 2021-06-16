@@ -75,7 +75,18 @@ void readConfigFile(const QString& iFilename)
 #if defined(QT_DEBUG)
         qDebug() << "Could not read URL.";
 #endif
-        baseUrl = "https://en.wikipedia.org/wiki/HTTP_404";
+        bool ok;
+        QString title("URL missing!");
+        QString message("The configuration file is not correct as it contains no URL.");
+        int c=0;
+        char**v;
+        QApplication app(c,v);
+        QMessageBox b( QMessageBox::Icon::Critical,title, message,QMessageBox::NoButton,nullptr,Qt::Dialog);
+        b.addButton(QMessageBox::StandardButton::Ok);
+        b.show();
+        b.exec();
+        exit(0);
+        //baseUrl = "https://en.wikipedia.org/wiki/HTTP_404";
     }
     wConfigFile.close();
 }
@@ -185,6 +196,7 @@ int main(int argc, char *argv[])
 
     FocusAgentII faii;
     QObject::connect(&a, &QApplication::applicationStateChanged, &faii, &FocusAgentII::onFocusLost);
+    QObject::connect(&faii, &FocusAgentII::focusLost, &w, &QtEA::onFocusLost);
 
     KeyboardAgent ka;
     QObject::connect(&w, &QtEA::closeRequest, &ka, &KeyboardAgent::terminate);
@@ -203,7 +215,7 @@ int main(int argc, char *argv[])
     ka.start();
 
     w.show();
-    //w.showFullScreen();
+    w.showFullScreen();
     QWidget* widgetArray[10];   //assuming that 10 additional screens are enough
     setupScreens(a, widgetArray);
 
