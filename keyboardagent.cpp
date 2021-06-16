@@ -163,9 +163,11 @@ void KeyboardAgent::terminate()
 #include <atomic>
 
 std::atomic_bool wIsRunning(false);
+Display* appDisplay;
 
 void KeyboardAgent::start()
 {
+    qDebug() << "started";
     mIsRunning = true;
     wIsRunning = true;
     setHook();
@@ -173,12 +175,13 @@ void KeyboardAgent::start()
 
 void workerFunc()
 {
+    qDebug() << "hello there";
     Display* display = XOpenDisplay(0);
-    Window root = DefaultRootWindow(display);
+    Window root DefaultRootWindow(display);
     XEvent evt;
 
     unsigned int modifiers = AnyModifier;
-    int keycode = XKeysymToKeycode(display, XK_Tab);
+    int keycode = XKeysymToKeycode(display, XK_C);
     Window grab_window = root;
     Bool owner_events = False;
     int pointer_mode = GrabModeAsync;
@@ -197,7 +200,11 @@ void workerFunc()
         switch(evt.type)
         {
         case KeyPress:
-            if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (ControlMask | Mod1Mask | Mod4Mask))
+            if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (ShiftMask))
+            {
+                XUngrabKey(display, keycode, modifiers, grab_window);
+            }
+            if((evt.xkey.state & (ShiftMask | ControlMask | Mod1Mask | Mod4Mask)) == (Mod4Mask))
             {
                 XUngrabKey(display, keycode, modifiers, grab_window);
             }

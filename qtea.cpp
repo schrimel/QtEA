@@ -152,15 +152,18 @@ void QtEA::onFocusInformationRequested()
  */
 void QtEA::closeEvent(QCloseEvent *event)
 {
-    //erster Ansatz: 1st click: setze flag auf true, 2nd click (flag gesetzt): beende Anwendung
-    if(!_dbg_close)
-    {
-        _dbg_close = true;
-        event->ignore();
-    }
-    else
-    {
-        emit closeRequest();
-        event->accept();
-    }
+    emit closeRequest();
+    event->accept();
+    QApplication::quit();
+//    //erster Ansatz: 1st click: setze flag auf true, 2nd click (flag gesetzt): beende Anwendung
+//    if(!_dbg_close)
+//    {
+//        _dbg_close = true;
+//        event->ignore();
+//    }
+//    else
+//    {
+//        emit closeRequest();
+//        event->accept();
+//    }
 }
