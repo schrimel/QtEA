@@ -31,7 +31,7 @@
 #pragma comment(lib, "comdlg32.lib")
 #endif
 
-const QString STD_CONFIG_FILE = "res/example-url-ssl.conf";
+const QString STD_CONFIG_FILE = "res/example-url.conf";
 QString title;
 QString baseUrl;
 bool measurePerformance = false;
@@ -66,7 +66,9 @@ void readConfigFile(const QString& iFilename)
             }
             else if(key == "measurePerformance")
             {
-                measurePerformance = true;
+                QString val = li.at(1).trimmed().toLower();
+                if(val == "true")
+                    measurePerformance = true;
             }
         }
     }
@@ -108,7 +110,8 @@ void wait(int ms)
 void initializeUi(QtEA & qtea)
 {
 #if defined(Q_OS_LINUX)
-    qtea.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+    qtea.setWindowFlags(Qt::WindowStaysOnTopHint);// | Qt::X11BypassWindowManagerHint);
+    //qtea.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
 #elif defined(Q_OS_WIN32)
     qtea.setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
 #endif
@@ -179,7 +182,7 @@ int main(int argc, char *argv[])
     //TODO calculate checksum
 
     QCoreApplication::setOrganizationName("QtEA");
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication a(argc, argv);
     QWebEngineProfile::defaultProfile()->setUseForGlobalCertificateVerification();
     QtEA w(nullptr, baseUrl);
@@ -235,11 +238,12 @@ int main(int argc, char *argv[])
     w.startBrowser();
 
     int ret = a.exec();
-    for(QWidget* w : widgetArray)
-    {
-        if(w != nullptr)
-            delete w;
-    }
+    qDebug() << "exited";
+//    for(QWidget* w : widgetArray)
+//    {
+//        if(w != nullptr)
+//            delete w;
+//    } causes seg fault...
 
     ka.terminate();
     na.terminate();

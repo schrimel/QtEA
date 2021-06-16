@@ -13,8 +13,12 @@
 #include <QPainter>
 #include <QDebug>
 
+#if defined(Q_OS_WINDOWS)
+
 #define NOMINMAX
 #include <windows.h>
+
+#endif
 
 
 //user includes
@@ -162,18 +166,24 @@ void Screencapture::saveScreenshotToFile(std::string iFilename)
     cv::imwrite(iFilename, wPrintimg);
 }
 
-#if defined(Q_OS_WINDOWS)
+//#if defined(Q_OS_WINDOWS)
 
 void Screencapture::screenshotOverlapToFile(tagRECT* tr, std::string iFilename)
 {
     QPixmap pm = grabScreens();
     QImage img = pm.toImage();
 
-    const int bsize = 10;
+    const int bsize = 1;
     const int width = tr->right - tr->left;
     const int height = tr->bottom - tr->top;
     const int x = tr->left;
     const int y = tr->top;
+
+    qDebug() << x;
+    qDebug() << y;
+
+    qDebug() << width;
+    qDebug() << height;
 
     cv::Mat wPrintimg = QImageToCvMat(img);
     cv::Rect region(x, y, width, height);
@@ -211,5 +221,3 @@ void Screencapture::screenshotOverlappingBlurred(std::vector<tagRECT *> liTr)
         wBlurredRegion.copyTo(wPrintimg(region));
     }
 }
-
-#endif

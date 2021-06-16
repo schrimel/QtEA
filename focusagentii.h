@@ -2,6 +2,7 @@
 #define FOCUSAGENTII_H
 
 #include <QObject>
+#include <QWidget>
 
 class FocusAgentII : public QObject
 {
@@ -14,6 +15,7 @@ public slots:
 
 private:
     int mScreenshotCounter;
+    bool isOverlapped(WId);
 
 signals:
     void focusLost(const QString &info);

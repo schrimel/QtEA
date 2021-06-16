@@ -10,6 +10,15 @@ class QPixmap;
 struct tagRECT;
 #endif
 
+#if defined(Q_OS_LINUX)
+struct tagRECT{
+    long top;
+    long bottom;
+    long left;
+    long right;
+};
+#endif
+
 #pragma once
 #include <opencv2/opencv.hpp>
 class Screencapture
@@ -17,7 +26,7 @@ class Screencapture
 public:
     Screencapture();
     void saveScreenshotToFile(std::string iFilename);
-#if defined(Q_OS_WINDOWS)
+#if defined(Q_OS_LINUX) || defined(Q_OS_WINDOWS)
     void screenshotOverlapToFile(tagRECT* tr, std::string iFilename);
     void screenshotOverlappingBlurred(std::vector<tagRECT*> liTr);
 #endif

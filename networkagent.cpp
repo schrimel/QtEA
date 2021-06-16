@@ -63,6 +63,7 @@ void NetworkAgent::monitorNetworkInterfaces()
             if(isP2P)
                 continue;
         }
+        QThread::sleep(1000);
     }
 }
 
